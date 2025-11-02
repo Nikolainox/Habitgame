@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project 1.2 – Greatness League Player Card Edition</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{margin:0;font-family:Poppins,sans-serif;background:#06111a;color:#fff;text-align:center}
+h1{color:#00eaff;text-shadow:0 0 12px #00eaff;margin:20px 0}
+.container{max-width:950px;margin:auto;padding:10px}
+#calendar{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin:20px auto}
+.card{position:relative;background:#0e1f2f;border:1px solid #00eaff30;border-radius:10px;padding:10px;cursor:pointer;transition:.3s;overflow:hidden}
+.card:hover{transform:scale(1.03)}
+.card.finalized{box-shadow:0 0 10px #00eaff70}
+.stats-card{position:absolute;bottom:4px;left:4px;right:4px;background:rgba(0,0,0,0.6);border-radius:6px;font-size:11px;padding:3px;line-height:1.2}
+button{background:linear-gradient(90deg,#ff0080,#7928ca);border:none;color:#fff;border-radius:20px;padding:8px 16px;margin:5px;cursor:pointer;font-weight:600}
+#popup{position:absolute;background:#001726ee;border:1px solid #00eaff;border-radius:8px;padding:10px;display:none;z-index:20}
+#chartContainer{width:90%;margin:20px auto;display:none}
+canvas{background:#111;border-radius:10px}
+input[type=number]{width:60px;text-align:center;border:none;border-radius:4px}
+.habit,.behavior{display:flex;align-items:center;justify-content:space-between;margin:4px 0}
+.sectionTitle{color:#00eaff;margin-top:10px}
+#scoreboard{display:none;background:#0b1926;border:1px solid #00eaff30;border-radius:12px;padding:15px;margin:15px auto;width:85%}
+table{margin:auto;border-collapse:collapse;color:#fff}
+th,td{padding:4px 8px;border-bottom:1px solid #00eaff30}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🏒 Greatness League – 90 Day Tracker</h1>
+
+<div>
+<button onclick="addHabit()">➕ Add Habit</button>
+<button onclick="addBehavior()">➕ Add Behavior</button>
+<button onclick="toggleChart()">📈 Chart</button>
+<button onclick="toggleScoreboard()">🏆 Team Board</button>
+</div>
+
+<div id="habitList"></div>
+<div id="behaviorList"></div>
+<div id="calendar"></div>
+<div id="popup"></div>
+<div id="chartContainer"><canvas id="progressChart" height="200"></canvas></div>
+<div id="scoreboard"></div>
+</div>
+
+<script>
+const totalDays=90;
+let habits=JSON.parse(localStorage.getItem("habits")||"[]");
+let behaviors=JSON.parse(localStorage.getItem("behaviors")||"[]");
+let days=JSON.parse(localStorage.getItem("days")||"[]");
+if(days.length===0){
+  for(let i=1;i<=totalDays;i++)
+    days.push({id:i,checks:[],mistakes:[],goalAvg:0,score:0,finalized:false});
+}
+let chart;
+
+/* --- Render lists --- */
+function renderHabits(){
+  const list=document.getElementById("habitList");
+  list.innerHTML="<h3 class='sectionTitle'>✅ Habits</h3>";
+  habits.forEach((h,i)=>{
+    const div=document.createElement("div");
+    div.className="habit";
+    div.innerHTML=`<span>${h}</span><button onclick="delHabit(${i})">🗑️</button>`;
+    list.appendChild(div);
+  });
+}
+function renderBehaviors(){
+  const list=document.getElementById("behaviorList");
+  list.innerHTML="<h3 class='sectionTitle'>❌ Behaviors</h3>";
+  behaviors.forEach((b,i)=>{
+    const div=document.createElement("div");
+    div.className="behavior";
+    div.innerHTML=`<span>${b}</span><button onclick="delBehavior(${i})">🗑️</button>`;
+    list.appendChild(div);
+  });
+}
+
+/* --- Add/Delete --- */
+function addHabit(){
+  const name=prompt("Habit name:"); if(!name)return;
+  habits.push(name);
+  days.forEach(d=>d.checks.push(false));
+  save();renderHabits();renderCalendar();
+}
+function addBehavior(){
+  const name=prompt("Behavior name:"); if(!name)return;
+  behaviors.push(name);
+  days.forEach(d=>d.mistakes.push(false));
+  save();renderBehaviors();renderCalendar();
+}
+function delHabit(i){
+  habits.splice(i,1);
+  days.forEach(d=>d.checks.splice(i,1));
+  save();renderHabits();renderCalendar();
+}
+function delBehavior(i){
+  behaviors.splice(i,1);
+  days.forEach(d=>d.mistakes.splice(i,1));
+  save();renderBehaviors();renderCalendar();
+}
+
+/* --- Calendar --- */
+const cal=document.getElementById("calendar");
+function renderCalendar(){
+  cal.innerHTML="";
+  days.forEach(d=>{
+    const el=document.createElement("div");
+    el.className="card"+(d.finalized?" finalized":"");
+    el.style.background=colorByScore(d.score);
+    el.innerHTML=`<h4>Day ${d.id}</h4><p>${(d.goalAvg||0).toFixed(1)}</p>`;
+    if(d.finalized)el.appendChild(renderDayStatsCard(d));
+    el.onclick=e=>openPopup(e,d.id);
+    cal.appendChild(el);
+  });
+}
+function colorByScore(s){
+  if(s>0.7)return"#00800080";
+  if(s>0.4)return"#99990080";
+  if(s>0)return"#66000080";
+  return"#0e1f2f";
+}
+
+/* --- Player Card (stats view) --- */
+function renderDayStatsCard(day){
+  const card=document.createElement("div");
+  card.className="stats-card";
+  const good=day.checks.filter(x=>x).length;
+  const bad=day.mistakes.filter(x=>x).length;
+  const habitSuccess=habits.length?good/habits.length:0;
+  const behaviorRate=behaviors.length?bad/behaviors.length:0;
+  const goalRate=(day.goalAvg/10)||0;
+  card.innerHTML=`
+  ✅ ${(habitSuccess*100).toFixed(0)}% 
+  ❌ ${(behaviorRate*100).toFixed(0)}%
+  🎯 ${(goalRate*100).toFixed(0)}%
+  🏒 ${(day.score*100).toFixed(0)}%
+  `;
+  return card;
+}
+
+/* --- Popup --- */
+function openPopup(e,id){
+  const d=days.find(x=>x.id===id);
+  const p=document.getElementById("popup");
+  p.style.left=e.pageX+"px"; p.style.top=e.pageY+"px";
+  let html=`<b>🏒 Day ${id}</b><br><h4>✅ Habits</h4>`;
+  habits.forEach((h,i)=>{
+    const checked=d.checks[i]?"checked":"";
+    html+=`<label><input type="checkbox" ${checked} onchange="toggleCheck(${id},${i})"/> ${h}</label><br>`;
+  });
+  html+="<h4>❌ Behaviors</h4>";
+  behaviors.forEach((b,i)=>{
+    const checked=d.mistakes[i]?"checked":"";
+    html+=`<label><input type="checkbox" ${checked} onchange="toggleMistake(${id},${i})"/> ${b}</label><br>`;
+  });
+  html+=`🎯 Goal Avg <input type="number" id="goal${id}" min="0" max="10" value="${d.goalAvg}"><br>
+  <button onclick="saveGoal(${id})">💾 Save</button>
+  <button onclick="finalizeDay(${id})">✅ Finalize</button>`;
+  p.innerHTML=html;p.style.display="block";
+}
+window.addEventListener("click",e=>{
+  if(!e.target.closest("#popup"))document.getElementById("popup").style.display="none";
+});
+function toggleCheck(dayId,hIndex){
+  const d=days.find(x=>x.id===dayId);
+  d.checks[hIndex]=!d.checks[hIndex]; save();
+}
+function toggleMistake(dayId,mIndex){
+  const d=days.find(x=>x.id===dayId);
+  d.mistakes[mIndex]=!d.mistakes[mIndex]; save();
+}
+function saveGoal(id){
+  const val=parseFloat(document.getElementById("goal"+id).value)||0;
+  const d=days.find(x=>x.id===id);
+  d.goalAvg=Math.max(0,Math.min(10,val)); save();
+}
+
+/* --- Finalize --- */
+function finalizeDay(id){
+  const d=days.find(x=>x.id===id);
+  const good=d.checks.filter(x=>x).length;
+  const bad=d.mistakes.filter(x=>x).length;
+  const habitSuccess=habits.length?good/habits.length:0;
+  const behaviorRate=behaviors.length?bad/behaviors.length:0;
+  const goalRate=(d.goalAvg/10)||0;
+  const finalizedCount=days.filter(x=>x.finalized).length;
+  const consistency=finalizedCount/totalDays;
+  let score=(( (habitSuccess + goalRate - behaviorRate)/2 )*0.7 + (consistency*0.3));
+  score=Math.max(0,Math.min(1,score));
+  d.score=parseFloat(score.toFixed(2)); d.finalized=true;
+  save();renderCalendar();
+  alert(`🏒 Day ${id} Finalized – Pat Riley Score: ${d.score}`);
+}
+
+/* --- Chart --- */
+function toggleChart(){
+  const c=document.getElementById("chartContainer");
+  c.style.display=c.style.display==="none"?"block":"none";
+  if(c.style.display==="block")drawChart();
+}
+function drawChart(){
+  const ctx=document.getElementById("progressChart").getContext("2d");
+  if(chart)chart.destroy();
+  const finalized=days.filter(d=>d.finalized);
+  chart=new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:finalized.map(d=>d.id),
+      datasets:[
+        {label:"Pat Riley Score",data:finalized.map(d=>d.score),borderColor:"#00eaff",fill:false},
+        {label:"Goal Avg",data:finalized.map(d=>d.goalAvg/10),borderColor:"#ff0080",fill:false},
+        {label:"Consistency",data:finalized.map((_,i)=>(i+1)/totalDays),borderColor:"#00ff88",fill:false}
+      ]
+    },
+    options:{scales:{y:{beginAtZero:true,max:1}},plugins:{legend:{labels:{color:"#fff"}}}}
+  });
+}
+
+/* --- Team Board --- */
+function toggleScoreboard(){
+  const s=document.getElementById("scoreboard");
+  if(s.style.display==="block"){s.style.display="none";return;}
+  const finalized=days.filter(d=>d.finalized);
+  if(finalized.length===0){alert("No finalized days yet!");return;}
+  const avgScore=(finalized.reduce((sum,d)=>sum+d.score,0)/finalized.length).toFixed(2);
+  const avgGoal=(finalized.reduce((sum,d)=>sum+d.goalAvg,0)/(finalized.length*10)).toFixed(2);
+  const avgMistake=(finalized.reduce((sum,d)=>sum+(d.mistakes.filter(x=>x).length),0)/(finalized.length*(behaviors.length||1))).toFixed(2);
+  const top=[...finalized].sort((a,b)=>b.score-a.score).slice(0,5);
+  let html=`<h3>🏆 Team Board</h3>
+  <p>Games Played: ${finalized.length}/90</p>
+  <p>Team Avg Score: ${avgScore} | Avg Goal: ${avgGoal} | Avg Mistake: ${avgMistake}</p>
+  <table><tr><th>Day</th><th>Score</th></tr>`;
+  top.forEach(t=>html+=`<tr><td>${t.id}</td><td>${t.score}</td></tr>`);
+  html+=`</table>`;
+  s.innerHTML=html;s.style.display="block";
+}
+
+/* --- Save --- */
+function save(){
+  localStorage.setItem("habits",JSON.stringify(habits));
+  localStorage.setItem("behaviors",JSON.stringify(behaviors));
+  localStorage.setItem("days",JSON.stringify(days));
+}
+renderHabits();renderBehaviors();renderCalendar();
+</script>
+</body>
+</html>
