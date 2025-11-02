@@ -3,106 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>90 Day Habit Tracker 🏒</title>
+  <title>🏒 90 Day Habit Tracker</title>
   <style>
+    :root {
+      --bg-dark: #0d1826;
+      --bg-light: #1d3557;
+      --accent: #ffb347;
+      --accent2: #ff7700;
+      --green: #3bb273;
+      --red: #d93746;
+      --card: rgba(255,255,255,.08);
+      --text: #f4f7fb;
+    }
     body {
       margin: 0;
       font-family: system-ui, sans-serif;
-      background: radial-gradient(circle at top, #203a5f, #0d1826);
-      color: #f4f7fb;
+      background: radial-gradient(circle at top, #1d3557, #0d1826);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       padding: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
       border-bottom: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(8px);
     }
     .title {
       font-weight: 700;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
+      margin-bottom: .3rem;
     }
     .scoreboard {
       display: flex;
-      gap: 1rem;
+      gap: .5rem;
       flex-wrap: wrap;
     }
-    .score-tile {
-      background: rgba(255,255,255,.08);
-      padding: .5rem .8rem;
+    .tile {
+      background: var(--card);
       border-radius: 12px;
-      min-width: 120px;
+      padding: .4rem .7rem;
+      text-align: center;
+      min-width: 90px;
     }
-    .score-tile small {
-      color: #8da4c7;
-      text-transform: uppercase;
+    .tile small {
+      display: block;
       font-size: .65rem;
+      color: #a8b6d3;
+      text-transform: uppercase;
     }
-    .score-tile div {
-      font-size: 1.1rem;
+    .tile div {
+      font-size: 1rem;
       font-weight: 600;
     }
     main {
-      display: grid;
-      grid-template-columns: 280px 1fr;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
       padding: 1rem;
     }
-    .panel {
-      background: rgba(255,255,255,.05);
+    .habits {
+      background: var(--card);
       border-radius: 12px;
-      padding: 1rem;
+      padding: .8rem;
     }
-    h3 { margin-top: 0; }
     .habit {
-      background: rgba(255,255,255,.07);
-      border-radius: 8px;
-      padding: .4rem .6rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: rgba(255,255,255,.08);
+      border-radius: 8px;
+      padding: .4rem .6rem;
       margin-bottom: .4rem;
     }
     .btn-del {
       background: rgba(217,55,70,.2);
       border: none;
       border-radius: 8px;
-      width: 22px;
-      height: 22px;
       color: #fff;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
     }
     form {
       display: flex;
       gap: .4rem;
-      margin-top: .5rem;
     }
     input, button {
       border: none;
       border-radius: 8px;
       padding: .4rem .6rem;
+      font-size: .9rem;
     }
     input {
       flex: 1;
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.1);
       color: #fff;
     }
     button {
-      background: linear-gradient(120deg,#ffb347,#ff7700);
+      background: linear-gradient(120deg,var(--accent),var(--accent2));
+      color: #0d1826;
       font-weight: 600;
       cursor: pointer;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: .7rem;
     }
-    th, td {
-      border-bottom: 1px solid rgba(255,255,255,.05);
-      padding: .4rem;
-      text-align: center;
+    .day-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: .6rem .5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      cursor: pointer;
+      transition: transform .15s ease, background .2s;
     }
-    tr.finalized { background: rgba(59,178,115,.2); }
-    tr.failed { background: rgba(217,55,70,.2); }
+    .day-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,.12);
+    }
+    .day-card.finalized { border-left: 4px solid var(--green); }
+    .day-card.failed { border-left: 4px solid var(--red); }
+    .day-num {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .stats {
+      font-size: .8rem;
+      color: #a8b6d3;
+      display: flex;
+      justify-content: space-between;
+    }
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -110,55 +150,58 @@
       display: none;
       align-items: center;
       justify-content: center;
+      z-index: 100;
     }
     .modal {
-      background: #0d1826;
-      border: 1px solid rgba(255,255,255,.25);
+      background: #102030;
+      border: 1px solid rgba(255,255,255,.2);
       border-radius: 12px;
       padding: 1rem;
-      width: 340px;
+      width: min(90%,340px);
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal h3 { margin-top: 0; }
-    .modal input[type="number"] {
-      width: 70px;
-      margin-left: .5rem;
+    .modal label { display: block; margin-bottom: .4rem; }
+    .goal-input { width: 70px; }
+    .modal-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: .8rem;
+    }
+    @media (max-width: 700px) {
+      header { flex-direction: column; align-items: flex-start; }
+      main { padding: .6rem; }
+      .cards { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); }
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="title">🏒 90 Day Habit Tracker</div>
+    <div>
+      <div class="title">🏒 90 Day Habit Tracker</div>
+      <small style="color:#a8b6d3;">Seuraa kehitystäsi – yksi päivä kerrallaan</small>
+    </div>
     <div class="scoreboard">
-      <div class="score-tile"><small>Habits</small><div id="sb-habits">0</div></div>
-      <div class="score-tile"><small>Keskiarvo</small><div id="sb-avg">—</div></div>
-      <div class="score-tile"><small>Pat Riley kasvu</small><div id="sb-pr">—</div></div>
+      <div class="tile"><small>Habits</small><div id="sb-habits">0</div></div>
+      <div class="tile"><small>Keskiarvo</small><div id="sb-avg">—</div></div>
+      <div class="tile"><small>Pat Riley</small><div id="sb-pr">—</div></div>
     </div>
   </header>
 
   <main>
-    <section class="panel">
-      <h3>Habits</h3>
+    <section class="habits">
+      <h3>Tapasi</h3>
       <div id="habit-list"></div>
       <form id="add-form">
-        <input id="habit-input" placeholder="Lisää uusi habit..." required />
+        <input id="habit-input" placeholder="Lisää uusi tapa..." required />
         <button type="submit">Add</button>
       </form>
     </section>
 
-    <section class="panel">
-      <h3>90 Päivän Tulostaulu</h3>
-      <table id="day-table">
-        <thead>
-          <tr>
-            <th>Päivä</th>
-            <th>Suoritettu</th>
-            <th>Goal %</th>
-            <th>Score %</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <section>
+      <h3>Tulostaulu – 90 päivää</h3>
+      <div class="cards" id="cards"></div>
     </section>
   </main>
 
@@ -168,27 +211,26 @@
       <div id="modal-habits"></div>
       <div style="margin-top:.5rem;">
         <label>Goal %:
-          <input type="number" id="goal-input" min="0" max="100">
+          <input type="number" id="goal-input" class="goal-input" min="0" max="100">
         </label>
       </div>
-      <div style="margin-top:.8rem;display:flex;justify-content:space-between;">
+      <div class="modal-buttons">
         <button id="btn-save">Tallenna</button>
-        <button id="btn-finalize">Finalize Day</button>
+        <button id="btn-finalize">Finalize</button>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "habit90_state_v2";
+    const STORAGE_KEY = "habit90_v3";
     let state = { habits: [], days: {} };
     const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     const load = () => {
       const s = localStorage.getItem(STORAGE_KEY);
       if (s) state = JSON.parse(s);
       else {
-        state.habits = [{id:"h1",name:"Harjoitus"}, {id:"h2",name:"Ravinto"}];
-        for (let i=1;i<=90;i++)
-          state.days[i] = { checks:{}, goal:null, score:null, finalized:false };
+        state.habits=[{id:"h1",name:"Harjoitus"},{id:"h2",name:"Ravinto"}];
+        for(let i=1;i<=90;i++) state.days[i]={checks:{},goal:null,score:null,finalized:false};
         save();
       }
     };
@@ -220,24 +262,25 @@
       save(); renderAll();
     };
 
-    // 90 Days table
-    function renderDays(){
-      const tbody=document.querySelector("#day-table tbody");
-      tbody.innerHTML="";
+    // Cards
+    function renderCards(){
+      const cont=document.getElementById("cards");
+      cont.innerHTML="";
       for(let i=1;i<=90;i++){
         const d=state.days[i];
         const done=Object.values(d.checks).filter(Boolean).length;
-        const tr=document.createElement("tr");
-        if(d.finalized) tr.classList.add(d.score>=(d.goal||0)? "finalized":"failed");
-        tr.innerHTML=`
-          <td>Day ${i}</td>
-          <td>${done}/${state.habits.length}</td>
-          <td>${d.goal ?? "—"}%</td>
-          <td>${d.score?d.score.toFixed(0):"—"}%</td>
-          <td><button data-day="${i}">Open</button></td>`;
-        tbody.appendChild(tr);
+        const card=document.createElement("div");
+        card.className="day-card";
+        if(d.finalized) card.classList.add(d.score>=(d.goal||0)? "finalized":"failed");
+        card.innerHTML=`
+          <div class="day-num">Day ${i}</div>
+          <div class="stats"><span>Done:</span><span>${done}/${state.habits.length}</span></div>
+          <div class="stats"><span>Goal:</span><span>${d.goal??"—"}%</span></div>
+          <div class="stats"><span>Score:</span><span>${d.score?d.score.toFixed(0):"—"}%</span></div>
+        `;
+        card.onclick=()=>openModal(i);
+        cont.appendChild(card);
       }
-      tbody.querySelectorAll("button").forEach(b=>b.onclick=()=>openModal(+b.dataset.day));
     }
 
     // Modal
@@ -250,18 +293,16 @@
       activeDay=day;
       const d=state.days[day];
       modal.style.display="flex";
-      document.getElementById("modal-title").textContent="Day "+day;
+      document.getElementById("modal-title").textContent=`Day ${day}`;
       modalHabits.innerHTML="";
       state.habits.forEach(h=>{
         if(!(h.id in d.checks)) d.checks[h.id]=false;
-        const row=document.createElement("div");
-        row.innerHTML=`<label><input type="checkbox" data-id="${h.id}" ${d.checks[h.id]?"checked":""}> ${h.name}</label>`;
+        const row=document.createElement("label");
+        row.innerHTML=`<input type="checkbox" data-id="${h.id}" ${d.checks[h.id]?"checked":""}> ${h.name}`;
         modalHabits.appendChild(row);
       });
       goalInput.value=d.goal??"";
-      modalHabits.querySelectorAll("input").forEach(c=>c.onchange=()=>{
-        d.checks[c.dataset.id]=c.checked;
-      });
+      modalHabits.querySelectorAll("input").forEach(c=>c.onchange=()=>{d.checks[c.dataset.id]=c.checked;});
     }
     modal.onclick=e=>{if(e.target===modal) modal.style.display="none";};
 
@@ -271,7 +312,6 @@
       d.finalized=false;
       save(); modal.style.display="none"; renderAll();
     };
-
     document.getElementById("btn-finalize").onclick=()=>{
       const d=state.days[activeDay];
       const done=Object.values(d.checks).filter(Boolean).length;
@@ -285,7 +325,7 @@
     // Scoreboard
     function getAvg(){
       const finals=Object.values(state.days).filter(d=>d.finalized && d.score!=null);
-      if(!finals.length) return null;
+      if(!finals.length)return null;
       return finals.reduce((a,b)=>a+b.score,0)/finals.length;
     }
     function updateScoreboard(){
@@ -299,9 +339,8 @@
       document.getElementById("sb-pr").textContent=(diff>=0?"+":"")+diff.toFixed(1)+"%";
     }
 
-    function renderAll(){ renderHabits(); renderDays(); updateScoreboard(); }
+    function renderAll(){ renderHabits(); renderCards(); updateScoreboard(); }
     load(); renderAll();
   </script>
 </body>
 </html>
-
