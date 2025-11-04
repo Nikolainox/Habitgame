@@ -1,346 +1,88 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🏒 Game Mode 90-Day Habit</title>
   <style>
-    :root {
-      --bg: #060913;
-      --hud: rgba(4, 7, 14, 0.65);
-      --card-front: radial-gradient(circle at top, #142133, #0a0f1a 65%);
-      --card-back: radial-gradient(circle at top, #0f1827, #060913 75%);
-      --accent: #00ffd5;
-      --accent2: #ffb347;
-      --success: #2ecc71;
-      --fail: #e74c3c;
-      --text: #f4f7fb;
-      --muted: #8da4c7;
-      --radius: 14px;
+    :root{
+      --bg:#060913;--hud:rgba(4,7,14,.65);
+      --card-front:radial-gradient(circle at top,#142133,#0a0f1a 65%);
+      --card-back:radial-gradient(circle at top,#0f1827,#060913 75%);
+      --accent:#00ffd5;--accent2:#ffb347;
+      --success:#2ecc71;--fail:#e74c3c;
+      --text:#f4f7fb;--muted:#8da4c7;--radius:14px;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: radial-gradient(circle at 10% 10%, #11213a, #060913 45%, #04070d 80%);
-      color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    *{box-sizing:border-box}
+    body{
+      margin:0;background:radial-gradient(circle at 10% 10%,#11213a,#060913 45%,#04070d 80%);
+      color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;
     }
+    header{
+      background:linear-gradient(120deg,rgba(13,21,33,.85),rgba(5,8,13,.55));
+      border-bottom:1px solid rgba(0,255,213,.15);
+      backdrop-filter:blur(10px);
+      padding:.8rem .7rem .6rem;display:flex;gap:.6rem;align-items:center;justify-content:space-between;flex-wrap:wrap;
+    }
+    .title-block{display:flex;gap:.6rem;align-items:center}
+    .badge{width:38px;height:38px;border-radius:14px;background:radial-gradient(circle,#00ffd5,#009a82);
+      display:grid;place-items:center;font-weight:700;color:#020406;box-shadow:0 0 16px rgba(0,255,213,.45)}
+    .title-text{font-weight:700;font-size:1.05rem}
+    .subtitle{font-size:.7rem;color:var(--muted)}
+    .hud-metrics{display:flex;gap:.45rem;flex-wrap:wrap}
+    .hud-tile{background:rgba(3,5,8,.25);border:1px solid rgba(0,255,213,.08);border-radius:9px;padding:.3rem .5rem .25rem;min-width:82px}
+    .hud-tile small{display:block;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .hud-tile .val{font-size:.95rem;font-weight:600}
+    .game-controls{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;width:100%;padding-top:.4rem}
+    .shot-btn{background:radial-gradient(circle at top,#00ffd5,#00bba1);border:none;border-radius:12px;
+      padding:.35rem .7rem;font-weight:600;color:#010305;font-size:.8rem;cursor:pointer;box-shadow:0 0 8px rgba(0,255,213,.4);transition:transform .1s}
+    .shot-btn:active{transform:scale(.92)}
+    .flash{animation:flashGlow .4s ease-out}
+    @keyframes flashGlow{0%{box-shadow:0 0 0 rgba(0,255,213,0)}50%{box-shadow:0 0 20px rgba(0,255,213,.9)}100%{box-shadow:0 0 0 rgba(0,255,213,0)}}
 
-    /* HEADER / HUD */
-    header {
-      background: linear-gradient(120deg, rgba(13,21,33,.85), rgba(5,8,13,.55));
-      border-bottom: 1px solid rgba(0,255,213,.15);
-      backdrop-filter: blur(10px);
-      padding: .8rem .7rem .6rem;
-      display: flex;
-      gap: .6rem;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .title-block {
-      display: flex;
-      gap: .6rem;
-      align-items: center;
-    }
-    .badge {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      background: radial-gradient(circle, #00ffd5, #009a82);
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      color: #020406;
-      box-shadow: 0 0 16px rgba(0,255,213,.45);
-    }
-    .title-text {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-    .subtitle {
-      font-size: .7rem;
-      color: var(--muted);
-    }
-    .hud-metrics {
-      display: flex;
-      gap: .45rem;
-      flex-wrap: wrap;
-    }
-    .hud-tile {
-      background: rgba(3,5,8,.25);
-      border: 1px solid rgba(0,255,213,.08);
-      border-radius: 9px;
-      padding: .3rem .5rem .25rem;
-      min-width: 82px;
-    }
-    .hud-tile small {
-      display: block;
-      font-size: .58rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-    .hud-tile .val {
-      font-size: .95rem;
-      font-weight: 600;
-    }
+    main{display:flex;flex-direction:column;gap:.75rem;padding:.75rem .75rem 1.2rem;flex:1;min-height:0}
+    .habits-panel{background:rgba(2,4,7,.35);border:1px solid rgba(255,255,255,.02);border-radius:var(--radius);padding:.6rem}
+    .habits-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;gap:.5rem}
+    .habits-list{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem}
+    .habit-pill{background:rgba(15,141,146,.22);border:1px solid rgba(0,255,213,.25);border-radius:99px;padding:.25rem .55rem .15rem;font-size:.7rem;display:flex;gap:.3rem;align-items:center}
+    .habit-pill button{background:rgba(231,76,60,.3);border:none;color:#fff;width:18px;height:18px;border-radius:6px;font-size:.6rem;cursor:pointer}
+    .add-form{display:flex;gap:.4rem}
+    .add-form input{flex:1;background:rgba(1,2,3,.4);border:1px solid rgba(255,255,255,.03);border-radius:999px;padding:.35rem .5rem;color:var(--text);font-size:.78rem}
+    .btn{background:linear-gradient(120deg,#00ffd5,#00bba1);border:none;border-radius:999px;padding:.35rem .65rem;font-weight:600;font-size:.7rem;cursor:pointer;color:#020406;white-space:nowrap}
 
-    /* MAIN LAYOUT */
-    main {
-      display: flex;
-      flex-direction: column;
-      gap: .75rem;
-      padding: .75rem .75rem 1.2rem;
-      flex: 1;
-      min-height: 0;
-    }
+    .grid-title{font-weight:600;margin:.1rem 0 .3rem}
+    .day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.55rem}
+    @media (max-width:480px){.day-grid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}}
 
-    /* HABITS PANEL */
-    .habits-panel {
-      background: rgba(2,4,7,.35);
-      border: 1px solid rgba(255,255,255,.02);
-      border-radius: var(--radius);
-      padding: .6rem .6rem .5rem;
-    }
-    .habits-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: .4rem;
-      gap: .5rem;
-    }
-    .habits-list {
-      display: flex;
-      gap: .4rem;
-      flex-wrap: wrap;
-      margin-bottom: .4rem;
-    }
-    .habit-pill {
-      background: rgba(15,141,146,.22);
-      border: 1px solid rgba(0,255,213,.25);
-      border-radius: 99px;
-      padding: .25rem .55rem .15rem;
-      font-size: .7rem;
-      display: flex;
-      gap: .3rem;
-      align-items: center;
-    }
-    .habit-pill button {
-      background: rgba(231,76,60,.3);
-      border: none;
-      color: #fff;
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      font-size: .6rem;
-      cursor: pointer;
-    }
-    .add-form {
-      display: flex;
-      gap: .4rem;
-    }
-    .add-form input {
-      flex: 1;
-      background: rgba(1,2,3,.4);
-      border: 1px solid rgba(255,255,255,.03);
-      border-radius: 999px;
-      padding: .35rem .5rem;
-      color: var(--text);
-      font-size: .78rem;
-    }
-    .btn {
-      background: linear-gradient(120deg, #00ffd5, #00bba1);
-      border: none;
-      border-radius: 999px;
-      padding: .35rem .65rem;
-      font-weight: 600;
-      font-size: .7rem;
-      cursor: pointer;
-      color: #020406;
-      white-space: nowrap;
-    }
+    .day-card{perspective:800px}
+    .day-inner{position:relative;width:100%;padding-top:110%;transform-style:preserve-3d;transition:transform .6s}
+    .day-card.flipped .day-inner{transform:rotateY(180deg)}
+    .day-face{position:absolute;inset:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+    .day-front{background:var(--card-front);border:1px solid rgba(0,255,213,.4);gap:.2rem}
+    .day-back{background:var(--card-back);border:1px solid rgba(255,255,255,.03);transform:rotateY(180deg);padding:.3rem .25rem;gap:.2rem;justify-content:flex-start;align-items:flex-start}
+    .day-num{font-size:1.2rem;font-weight:700;letter-spacing:.02em}
+    .emoji{font-size:1.1rem}
+    .tag{font-size:.58rem;text-transform:uppercase;background:rgba(0,0,0,.35);border:1px solid rgba(0,255,213,.15);border-radius:999px;padding:.1rem .3rem}
+    .score-pill{font-size:.6rem;background:rgba(0,255,213,.08);border-radius:999px;padding:.1rem .25rem}
+    .bar-wrap{width:100%;background:rgba(255,255,255,.03);height:6px;border-radius:999px;overflow:hidden;margin-top:.2rem}
+    .bar{height:100%;background:linear-gradient(90deg,#00ffd5 0%,#00ff6f 90%);width:0%;transition:width .35s}
+    .stat-line{font-size:.64rem;display:flex;justify-content:space-between;width:100%;color:var(--muted)}
+    .back-btn{margin-top:.25rem;font-size:.62rem;background:rgba(0,255,213,.1);border:1px solid rgba(0,255,213,.25);border-radius:999px;padding:.15rem .4rem;cursor:pointer;color:var(--text)}
+    .day-card.success .day-front{box-shadow:0 0 12px rgba(0,255,138,.45)}
+    .day-card.fail .day-front{box-shadow:0 0 12px rgba(248,68,68,.35);border-color:rgba(248,68,68,.45)}
 
-    /* 90-DAY GRID */
-    .grid-title {
-      font-weight: 600;
-      margin-bottom: .3rem;
-    }
-    .day-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: .55rem;
-    }
-    @media (max-width: 480px) {
-      .day-grid { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
-    }
+    .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:50}
+    .modal{background:radial-gradient(circle at top,#18263a,#0b1019 70%);border:1px solid rgba(0,255,213,.3);border-radius:14px;width:min(360px,94%);padding:.6rem .7rem;box-shadow:0 0 25px rgba(0,255,213,.25);animation:pop .22s ease-out;max-height:90vh;overflow-y:auto}
+    @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal h3{margin:.1rem 0 .4rem 0}
+    .modal-habits label{display:block;font-size:.78rem;margin-bottom:.35rem}
+    .stats-box{background:rgba(1,2,3,.2);border:1px solid rgba(255,255,255,.02);border-radius:10px;padding:.35rem .45rem .25rem;margin-top:.45rem;font-size:.7rem}
+    .stats-row{display:flex;justify-content:space-between;margin-bottom:.15rem;color:var(--muted)}
+    .modal-buttons{display:flex;gap:.4rem;justify-content:space-between;margin-top:.45rem}
+    .ghost{background:rgba(255,255,255,.06);color:var(--text)}
 
-    .day-card {
-      perspective: 800px;
-    }
-    .day-inner {
-      position: relative;
-      width: 100%;
-      padding-top: 110%;
-      transform-style: preserve-3d;
-      transition: transform .6s;
-    }
-    .day-card.flipped .day-inner {
-      transform: rotateY(180deg);
-    }
-    .day-face {
-      position: absolute;
-      inset: 0;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      backface-visibility: hidden;
-      box-shadow: 0 3px 12px rgba(0,0,0,.35);
-    }
-    .day-front {
-      background: var(--card-front);
-      border: 1px solid rgba(0,255,213,.4);
-      gap: .2rem;
-    }
-    .day-back {
-      background: var(--card-back);
-      border: 1px solid rgba(255,255,255,.03);
-      transform: rotateY(180deg);
-      padding: .3rem .25rem;
-      gap: .15rem;
-      justify-content: flex-start;
-      align-items: flex-start;
-    }
-    .day-num {
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-    .emoji {
-      font-size: 1.1rem;
-    }
-    .tag {
-      font-size: .58rem;
-      text-transform: uppercase;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(0,255,213,.15);
-      border-radius: 999px;
-      padding: .1rem .3rem;
-    }
-    .score-pill {
-      font-size: .6rem;
-      background: rgba(0,255,213,.08);
-      border-radius: 999px;
-      padding: .1rem .25rem;
-    }
-    .bar-wrap {
-      width: 100%;
-      background: rgba(255,255,255,.03);
-      height: 6px;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: .2rem;
-    }
-    .bar {
-      height: 100%;
-      background: linear-gradient(90deg, #00ffd5 0%, #00ff6f 90%);
-      width: 0%;
-      transition: width .35s;
-    }
-    .stat-line {
-      font-size: .6rem;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      color: var(--muted);
-    }
-    .back-btn {
-      margin-top: .25rem;
-      font-size: .6rem;
-      background: rgba(0,255,213,.1);
-      border: 1px solid rgba(0,255,213,.25);
-      border-radius: 999px;
-      padding: .15rem .4rem;
-      cursor: pointer;
-      color: var(--text);
-    }
-    .day-card.success .day-front {
-      box-shadow: 0 0 12px rgba(0,255,138,.45);
-    }
-    .day-card.fail .day-front {
-      box-shadow: 0 0 12px rgba(248,68,68,.35);
-      border-color: rgba(248,68,68,.45);
-    }
-
-    /* MODAL */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.55);
-      z-index: 50;
-    }
-    .modal {
-      background: radial-gradient(circle at top, #18263a, #0b1019 70%);
-      border: 1px solid rgba(0,255,213,.3);
-      border-radius: 14px;
-      width: min(360px, 94%);
-      padding: .6rem .7rem;
-      box-shadow: 0 0 25px rgba(0,255,213,.25);
-      animation: pop .22s ease-out;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    @keyframes pop {
-      from { transform: scale(.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .modal h3 {
-      margin-top: 0;
-      margin-bottom: .4rem;
-    }
-    .modal-habits label {
-      display: block;
-      font-size: .78rem;
-      margin-bottom: .35rem;
-    }
-    .stats-box {
-      background: rgba(1,2,3,.2);
-      border: 1px solid rgba(255,255,255,.02);
-      border-radius: 10px;
-      padding: .35rem .45rem .25rem;
-      margin-top: .45rem;
-      font-size: .7rem;
-    }
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: .15rem;
-      color: var(--muted);
-    }
-    .modal-buttons {
-      display: flex;
-      gap: .4rem;
-      justify-content: flex-end;
-      margin-top: .4rem;
-    }
-    .ghost {
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-    }
-
-    @media (max-width: 720px) {
-      header { align-items: flex-start; }
-      .title-text { font-size: 1rem; }
-      .hud-metrics { width: 100%; }
-    }
+    @media (max-width:720px){header{align-items:flex-start}.title-text{font-size:1rem}.hud-metrics{width:100%}}
   </style>
 </head>
 <body>
@@ -349,31 +91,24 @@
       <div class="badge">HK</div>
       <div>
         <div class="title-text">90 Day Game Tracker</div>
-        <div class="subtitle">Päivä kerrallaan · flip + stats · localStorage</div>
+        <div class="subtitle">Flip-kortit · stats · localStorage</div>
       </div>
     </div>
     <div class="hud-metrics">
-      <div class="hud-tile">
-        <small>Habits</small>
-        <div class="val" id="hud-habits">0</div>
-      </div>
-      <div class="hud-tile">
-        <small>Keskiarvo</small>
-        <div class="val" id="hud-avg">—</div>
-      </div>
-      <div class="hud-tile">
-        <small>Pat Riley</small>
-        <div class="val" id="hud-pr">—</div>
-      </div>
-      <div class="hud-tile">
-        <small>XP</small>
-        <div class="val" id="hud-xp">0</div>
-      </div>
-      <div class="hud-tile">
-        <small>Streak</small>
-        <div class="val" id="hud-streak">0</div>
-      </div>
+      <div class="hud-tile"><small>Habits</small><div class="val" id="hud-habits">0</div></div>
+      <div class="hud-tile"><small>Keskiarvo</small><div class="val" id="hud-avg">—</div></div>
+      <div class="hud-tile"><small>Pat Riley</small><div class="val" id="hud-pr">—</div></div>
+      <div class="hud-tile"><small>XP</small><div class="val" id="hud-xp">0</div></div>
+      <div class="hud-tile"><small>Streak</small><div class="val" id="hud-streak">0</div></div>
     </div>
+
+    <!-- Game Controls: globaalit tilastot (ei riko päivälaskureita) -->
+    <div class="game-controls">
+      <button class="shot-btn" data-type="goal">🥅 Maali</button>
+      <button class="shot-btn" data-type="puck">🏒 Kiekko</button>
+      <button class="shot-btn" data-type="shot">💥 Laukaus</button>
+    </div>
+    <div id="hud-extra" style="font-size:.65rem;text-align:center;color:#8da4c7;margin-top:.25rem;width:100%;">🥅 0 · 🏒 0 · 💥 0</div>
   </header>
 
   <main>
@@ -384,7 +119,7 @@
       </div>
       <div class="habits-list" id="habits-list"></div>
       <form class="add-form" id="add-habit-form">
-        <input id="habit-input" placeholder="Lisää uusi tapa…" required>
+        <input id="habit-input" placeholder="Lisää uusi tapa…" required />
         <button class="btn" type="submit">Add</button>
       </form>
     </section>
@@ -409,281 +144,264 @@
         <div class="stats-row"><span>Done</span><span id="m-done">—</span></div>
         <div class="stats-row"><span>Score</span><span id="m-score">—</span></div>
         <div class="stats-row"><span>Pat Riley</span><span id="m-pr">—</span></div>
+        <div class="stats-row"><span>Laukaukset</span><span id="m-shots">—</span></div>
         <div class="stats-row"><span>Status</span><span id="m-status">—</span></div>
       </div>
       <div class="modal-buttons">
-        <button class="btn ghost" id="btn-close-modal" type="button">Sulje</button>
-        <button class="btn" id="btn-finalize" type="button">Finalize</button>
+        <button class="btn ghost" id="btn-shoot" type="button">💥 Laukaus</button>
+        <div style="display:flex;gap:.4rem;">
+          <button class="btn ghost" id="btn-close-modal" type="button">Sulje</button>
+          <button class="btn" id="btn-finalize" type="button">Finalize</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "habit90_game_v1";
-    let state = { habits: [], days: {} };
+    const STORAGE_KEY = "habit90_game_v1"; // pidetään samana → data säilyy
+    let state = { habits: [], days: {}, shots: { goal:0, puck:0, shot:0 } };
 
-    // ===== INIT / STORAGE =====
-    function loadState() {
+    // ========= INIT / STORAGE =========
+    function loadState(){
       const s = localStorage.getItem(STORAGE_KEY);
-      if (s) {
+      if(s){
         state = JSON.parse(s);
-      } else {
-        state.habits = [
-          { id: "h1", name: "Laukaus" },
-          { id: "h2", name: "Luistelu" }
-        ];
-        for (let i = 1; i <= 90; i++) {
-          state.days[i] = { checks: {}, goal: null, score: null, finalized: false };
+        // migraatiot (vanha data ilman shots-kenttiä)
+        if(!state.shots) state.shots = {goal:0,puck:0,shot:0};
+        if(!state.days) state.days = {};
+        for(let i=1;i<=90;i++){
+          if(!state.days[i]) state.days[i] = {checks:{},goal:null,score:null,finalized:false,shots:0};
+          if(typeof state.days[i].shots!=="number") state.days[i].shots = 0;
+          if(!state.days[i].checks) state.days[i].checks = {};
         }
+      } else {
+        state.habits = [{id:"h1",name:"Laukaus"},{id:"h2",name:"Luistelu"}];
+        for(let i=1;i<=90;i++) state.days[i] = {checks:{},goal:null,score:null,finalized:false,shots:0};
+        state.shots = {goal:0,puck:0,shot:0};
         saveState();
       }
     }
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      updateHUD();
-    }
+    function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateHUD(); }
 
-    // ====== HELPERS ======
-    function getFinalizedDays() {
-      return Object.values(state.days).filter(d => d.finalized && typeof d.score === "number");
+    // ========= HELPERS / METRICS =========
+    function getFinalizedDays(){
+      // palauta aikajärjestyksessä 1..90
+      return Object.keys(state.days).sort((a,b)=>+a-+b).map(k=>state.days[k]).filter(d=>d.finalized && typeof d.score==="number");
     }
-    function getAvgScore() {
-      const f = getFinalizedDays();
-      if (!f.length) return null;
-      const sum = f.reduce((a,b)=>a+b.score,0);
-      return sum / f.length;
+    function getAvgScore(){
+      const f = getFinalizedDays(); if(!f.length) return null;
+      return f.reduce((a,b)=>a+b.score,0)/f.length;
     }
-    function getPatRileyGlobal() {
+    function getPatRileyGlobal(){
       const f = getFinalizedDays();
-      if (f.length < 2) return null;
+      if(f.length<2) return null;
       const last = f[f.length-1].score;
       const prevAvg = f.slice(0,-1).reduce((a,b)=>a+b.score,0)/(f.length-1);
-      if (prevAvg === 0) return null;
-      return ((last - prevAvg) / prevAvg) * 100;
+      if(prevAvg===0) return null;
+      return ((last-prevAvg)/prevAvg)*100;
     }
-    function computeXP() {
-      const finalized = getFinalizedDays();
-      const base = finalized.length * 50;
+    function computeXP(){
+      const f = getFinalizedDays().length;
       const avg = getAvgScore() || 0;
-      // pieni bonus hyvästä keskiarvosta
-      return Math.round(base + avg);
+      return Math.round(f*50 + avg);
     }
-    function computeStreak() {
-      // lasketaan järjestyksessä viimeisestä päivästä taaksepäin
-      let streak = 0;
-      for (let i = 90; i >= 1; i--) {
+    function computeStreak(){
+      let s=0;
+      for(let i=90;i>=1;i--){
         const d = state.days[i];
-        if (d && d.finalized) streak++;
-        else break;
+        if(d && d.finalized) s++; else break;
       }
-      return streak;
+      return s;
+    }
+    function calcPatRileyForScore(score){
+      const avg = getAvgScore();
+      if(!avg || avg===0 || isNaN(score)) return "—";
+      const diff = ((score-avg)/avg)*100;
+      return (diff>=0?"+":"")+diff.toFixed(1)+"%";
     }
 
-    // ====== HUD ======
-    function updateHUD() {
+    // ========= HUD =========
+    function updateHUD(){
       document.getElementById("hud-habits").textContent = state.habits.length;
       const avg = getAvgScore();
-      document.getElementById("hud-avg").textContent = avg ? avg.toFixed(1) + "%" : "—";
+      document.getElementById("hud-avg").textContent = avg ? avg.toFixed(1)+"%" : "—";
       const pr = getPatRileyGlobal();
-      document.getElementById("hud-pr").textContent = pr == null ? "—" : (pr >= 0 ? "+" : "") + pr.toFixed(1) + "%";
+      document.getElementById("hud-pr").textContent = pr==null ? "—" : (pr>=0?"+":"")+pr.toFixed(1)+"%";
       document.getElementById("hud-xp").textContent = computeXP();
       document.getElementById("hud-streak").textContent = computeStreak();
-      document.getElementById("habit-count").textContent = state.habits.length + " kpl";
+      document.getElementById("habit-count").textContent = state.habits.length+" kpl";
+      // HUD extra globaalit laukaisutilastot
+      document.getElementById("hud-extra").textContent = `🥅 ${state.shots.goal} · 🏒 ${state.shots.puck} · 💥 ${state.shots.shot}`;
     }
 
-    // ====== HABITS UI ======
+    // ========= HABITS UI =========
     const habitsListEl = document.getElementById("habits-list");
-    function renderHabits() {
+    function renderHabits(){
       habitsListEl.innerHTML = "";
-      state.habits.forEach(h => {
+      state.habits.forEach(h=>{
         const pill = document.createElement("div");
-        pill.className = "habit-pill";
-        pill.innerHTML = `<span>${h.name}</span><button data-id="${h.id}">×</button>`;
+        pill.className="habit-pill";
+        pill.innerHTML = `<span>${h.name}</span><button data-id="${h.id}" title="Poista">×</button>`;
         habitsListEl.appendChild(pill);
       });
-      habitsListEl.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
+      habitsListEl.querySelectorAll("button").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
           const id = btn.getAttribute("data-id");
-          state.habits = state.habits.filter(h => h.id !== id);
-          // poista myös päivien checkit
-          Object.values(state.days).forEach(d => {
-            if (d.checks && id in d.checks) delete d.checks[id];
-          });
-          saveState();
-          renderAll();
+          state.habits = state.habits.filter(h=>h.id!==id);
+          Object.values(state.days).forEach(d=>{ if(d.checks && id in d.checks) delete d.checks[id]; });
+          saveState(); renderAll();
         });
       });
     }
-    document.getElementById("add-habit-form").addEventListener("submit", e => {
+    document.getElementById("add-habit-form").addEventListener("submit", e=>{
       e.preventDefault();
       const inp = document.getElementById("habit-input");
-      const name = inp.value.trim();
-      if (!name) return;
-      const id = "h" + Math.random().toString(36).slice(2, 7);
-      state.habits.push({ id, name });
-      // lisätään false kaikkiin päiviin
-      Object.values(state.days).forEach(d => {
-        if (!d.checks) d.checks = {};
-        d.checks[id] = d.checks[id] || false;
-      });
-      saveState();
-      renderAll();
-      inp.value = "";
+      const name = inp.value.trim(); if(!name) return;
+      const id = "h"+Math.random().toString(36).slice(2,7);
+      state.habits.push({id,name});
+      // lisää uusi habit kaikkiin päiviin falseksi
+      Object.values(state.days).forEach(d=>{ if(!d.checks) d.checks={}; if(!(id in d.checks)) d.checks[id]=false; });
+      saveState(); renderAll(); inp.value="";
     });
 
-    // ====== DAY GRID ======
-    const gridEl = document.getElementById("day-grid");
+    // ========= GAME CONTROLS (globaalit) =========
+    document.querySelectorAll(".shot-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const t = btn.dataset.type;
+        if(!state.shots) state.shots = {goal:0,puck:0,shot:0};
+        state.shots[t] = (state.shots[t]||0) + 1;
+        saveState();
+        btn.classList.add("flash");
+        setTimeout(()=>btn.classList.remove("flash"),400);
+      });
+    });
 
-    function emojiForDay(d) {
-      if (!d.finalized) return "🕐";
-      if (d.goal != null && d.score != null) {
-        if (d.score >= d.goal) return "😎";
-        return "🤔";
-      }
+    // ========= DAY GRID =========
+    const gridEl = document.getElementById("day-grid");
+    function emojiForDay(d){
+      if(!d.finalized) return "🕐";
+      if(d.goal!=null && d.score!=null){ return d.score>=d.goal ? "😎" : "🤔"; }
       return "✅";
     }
-
-    function renderGrid() {
-      gridEl.innerHTML = "";
-      for (let i = 1; i <= 90; i++) {
+    function renderGrid(){
+      gridEl.innerHTML="";
+      for(let i=1;i<=90;i++){
         const d = state.days[i];
+        if(typeof d.shots!=="number") d.shots = 0; // varmuus
         const card = document.createElement("div");
-        card.className = "day-card";
-        const pass = d.finalized && d.goal != null && d.score != null && d.score >= d.goal;
-        if (d.finalized) card.classList.add(pass ? "success" : "fail");
+        card.className="day-card";
 
-        const done = Object.values(d.checks || {}).filter(Boolean).length;
+        const done = Object.values(d.checks||{}).filter(Boolean).length;
         const total = state.habits.length || 1;
-        const score = d.score != null ? d.score : (done / total) * 100;
+        const score = (d.score!=null ? d.score : (done/total)*100);
+        const pass = d.finalized && d.goal!=null && d.score!=null && d.score>=d.goal;
+        if(d.finalized) card.classList.add(pass?"success":"fail");
 
         card.innerHTML = `
           <div class="day-inner">
             <div class="day-face day-front">
               <div class="day-num">${i}</div>
               <div class="emoji">${emojiForDay(d)}</div>
-              <div class="tag">${d.finalized ? "Finalized" : "Draft"}</div>
-              <div class="bar-wrap"><div class="bar" style="width:${score.toFixed(0)}%;"></div></div>
+              <div class="tag">${d.finalized?"Finalized":"Draft"}</div>
+              <div class="bar-wrap"><div class="bar" style="width:${Math.max(0,Math.min(100,score)).toFixed(0)}%;"></div></div>
             </div>
             <div class="day-face day-back">
               <div class="stat-line"><span>Done</span><span>${done}/${state.habits.length}</span></div>
               <div class="stat-line"><span>Goal</span><span>${d.goal ?? "—"}%</span></div>
-              <div class="stat-line"><span>Score</span><span>${d.score != null ? d.score.toFixed(0) : score.toFixed(0)}%</span></div>
-              <div class="stat-line"><span>Riley</span><span>${calcPatRileyForScore(d, score)}</span></div>
+              <div class="stat-line"><span>Score</span><span>${(d.score!=null?d.score:score).toFixed(0)}%</span></div>
+              <div class="stat-line"><span>Riley</span><span>${calcPatRileyForScore(score)}</span></div>
+              <div class="stat-line"><span>Shots</span><span>${d.shots}</span></div>
               <button class="back-btn" data-day="${i}" type="button">Edit day</button>
             </div>
           </div>
         `;
-        // flip click
-        card.addEventListener("click", (ev) => {
-          // jos painettiin edit-nappia, ei flipata tässä
-          if (ev.target.matches(".back-btn")) return;
-          card.classList.toggle("flipped");
-        });
+        // flip
+        card.addEventListener("click",(ev)=>{ if(ev.target.matches(".back-btn")) return; card.classList.toggle("flipped"); });
         gridEl.appendChild(card);
       }
       // edit napit
-      gridEl.querySelectorAll(".back-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          const d = +btn.getAttribute("data-day");
-          openModal(d);
-          e.stopPropagation();
-        });
+      gridEl.querySelectorAll(".back-btn").forEach(btn=>{
+        btn.addEventListener("click",(e)=>{ const d=+btn.getAttribute("data-day"); openModal(d); e.stopPropagation(); });
       });
     }
 
-    // ====== PAT RILEY PER DAY ======
-    function calcPatRileyForScore(dayData, tmpScore) {
-      const seasonAvg = getAvgScore();
-      if (!seasonAvg || !tmpScore) return "—";
-      const diff = ((tmpScore - seasonAvg) / seasonAvg) * 100;
-      const sign = diff >= 0 ? "+" : "";
-      return sign + diff.toFixed(1) + "%";
-    }
-
-    // ====== MODAL ======
+    // ========= MODAL =========
     const modalWrap = document.getElementById("modal-wrap");
     const modalHabits = document.getElementById("modal-habits");
     const modalTitle = document.getElementById("modal-title");
     const goalInput = document.getElementById("goal-input");
+    const shootBtn = document.getElementById("btn-shoot");
     let activeDay = null;
 
-    function openModal(dayNum) {
+    function openModal(dayNum){
       activeDay = dayNum;
       const d = state.days[dayNum];
-      modalTitle.textContent = "Day " + dayNum;
-      modalHabits.innerHTML = "";
-      state.habits.forEach(h => {
-        if (!d.checks) d.checks = {};
-        if (!(h.id in d.checks)) d.checks[h.id] = false;
+      if(typeof d.shots!=="number") d.shots = 0;
+      modalTitle.textContent = "Day "+dayNum;
+      modalHabits.innerHTML="";
+      state.habits.forEach(h=>{
+        if(!d.checks) d.checks={};
+        if(!(h.id in d.checks)) d.checks[h.id]=false;
         const lb = document.createElement("label");
-        lb.innerHTML = `<input type="checkbox" data-id="${h.id}" ${d.checks[h.id] ? "checked" : ""}> ${h.name}`;
+        lb.innerHTML = `<input type="checkbox" data-id="${h.id}" ${d.checks[h.id]?"checked":""}> ${h.name}`;
         modalHabits.appendChild(lb);
       });
       goalInput.value = d.goal ?? "";
-      modalWrap.style.display = "flex";
-      // listeners
-      modalHabits.querySelectorAll("input[type=checkbox]").forEach(c => {
-        c.addEventListener("change", () => {
-          d.checks[c.getAttribute("data-id")] = c.checked;
-          updateModalStats();
-        });
+      modalWrap.style.display="flex";
+      modalHabits.querySelectorAll("input[type=checkbox]").forEach(c=>{
+        c.addEventListener("change",()=>{ d.checks[c.getAttribute("data-id")] = c.checked; updateModalStats(); });
       });
       updateModalStats();
     }
-
-    function closeModal() {
-      modalWrap.style.display = "none";
-      activeDay = null;
-    }
-
+    function closeModal(){ modalWrap.style.display="none"; activeDay=null; }
     document.getElementById("btn-close-modal").addEventListener("click", closeModal);
-    modalWrap.addEventListener("click", (e) => {
-      if (e.target === modalWrap) closeModal();
+    modalWrap.addEventListener("click",(e)=>{ if(e.target===modalWrap) closeModal(); });
+
+    shootBtn.addEventListener("click", ()=>{
+      if(!activeDay) return;
+      const d = state.days[activeDay];
+      if(typeof d.shots!=="number") d.shots = 0;
+      d.shots++;                    // päiväkohtainen laukaus
+      state.shots.shot++;           // kasvatetaan myös globaalin HUDin “💥”
+      saveState();
+      updateModalStats();
+      shootBtn.classList.add("flash");
+      setTimeout(()=>shootBtn.classList.remove("flash"),400);
     });
 
-    function updateModalStats() {
-      if (!activeDay) return;
+    function updateModalStats(){
+      if(!activeDay) return;
       const d = state.days[activeDay];
-      const done = Object.values(d.checks || {}).filter(Boolean).length;
+      const done = Object.values(d.checks||{}).filter(Boolean).length;
       const total = state.habits.length || 1;
-      const score = (done / total) * 100;
+      const score = (done/total)*100;
       document.getElementById("m-done").textContent = `${done}/${total}`;
-      document.getElementById("m-score").textContent = isNaN(score) ? "—" : score.toFixed(0) + "%";
+      document.getElementById("m-score").textContent = isNaN(score) ? "—" : score.toFixed(0)+"%";
       document.getElementById("m-status").textContent = d.finalized ? "Finalized" : "Draft";
-      document.getElementById("m-pr").textContent = calcPatRileyForScore(d, score);
+      document.getElementById("m-pr").textContent = calcPatRileyForScore(score);
+      document.getElementById("m-shots").textContent = d.shots ?? 0;
     }
 
-    document.getElementById("btn-finalize").addEventListener("click", () => {
-      if (!activeDay) return;
+    document.getElementById("btn-finalize").addEventListener("click", ()=>{
+      if(!activeDay) return;
       const d = state.days[activeDay];
-      const done = Object.values(d.checks || {}).filter(Boolean).length;
+      const done = Object.values(d.checks||{}).filter(Boolean).length;
       const total = state.habits.length || 1;
-      d.score = (done / total) * 100;
+      d.score = (done/total)*100;
       d.goal = +goalInput.value || null;
       d.finalized = true;
       saveState();
       closeModal();
       renderAll();
-      // pieni efekti onnistumiselle
-      if (d.goal && d.score >= d.goal) {
-        document.body.style.background = "radial-gradient(circle at top, #00ffa1, #060913 55%)";
-        setTimeout(() => {
-          document.body.style.background = "radial-gradient(circle at 10% 10%, #11213a, #060913 45%, #04070d 80%)";
-        }, 900);
+      if(d.goal && d.score >= d.goal){
+        document.body.style.background = "radial-gradient(circle at top,#00ffa1,#060913 55%)";
+        setTimeout(()=>{ document.body.style.background = "radial-gradient(circle at 10% 10%,#11213a,#060913 45%,#04070d 80%)"; }, 900);
       }
     });
 
-    // ====== RENDER ALL ======
-    function renderAll() {
-      renderHabits();
-      renderGrid();
-      updateHUD();
-    }
-
-    // ====== START ======
-    loadState();
-    renderAll();
+    // ========= RENDER =========
+    function renderAll(){ renderHabits(); renderGrid(); updateHUD(); }
+    loadState(); renderAll();
   </script>
 </body>
 </html>
-
